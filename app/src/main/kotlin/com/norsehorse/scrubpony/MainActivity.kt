@@ -20,6 +20,16 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.PickMultipleVisualMedia(50),
     ) { uris -> if (uris.isNotEmpty()) viewModel.scrub(uris) }
 
+    // The system photo picker only surfaces "visual media" the gallery knows
+    // about, which is why HEICs sitting in Files often do not appear. The
+    // document picker (Storage Access Framework) browses Files, Downloads, an
+    // SD card, a synced cloud folder, anything, filtered to images. The read
+    // grant it hands back is short-lived, but ScrubEngine copies each input
+    // into cache immediately, so that is long enough.
+    private val pickDocuments = registerForActivityResult(
+        ActivityResultContracts.OpenMultipleDocuments(),
+    ) { uris -> if (uris.isNotEmpty()) viewModel.scrub(uris) }
+
     // OpenDocumentTree takes no input and hands back a folder Uri on success
     // (null if the user backed out), so the files it should save are stashed
     // here between the launch call and the picker's result arriving.
@@ -42,6 +52,9 @@ class MainActivity : ComponentActivity() {
                         pickImages.launch(
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                         )
+                    },
+                    onPickFiles = {
+                        pickDocuments.launch(arrayOf("image/*"))
                     },
                     onShareResults = { files -> shareResults(files) },
                     onSaveResults = { files -> saveResults(files) },

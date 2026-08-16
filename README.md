@@ -21,8 +21,13 @@ Two entry points into the same scrubbing pipeline:
   detects JPEG, PNG, WebP or HEIC automatically, strips GPS, timestamps,
   device info and embedded thumbnails, then lets you save the clean copies or
   share them straight back out.
-- **In-app picker.** Open the app directly and pick photos from your library
-  via Android's built-in Photo Picker (no storage permission needed).
+- **In-app picker.** Open the app directly and pick images two ways, no
+  storage permission needed either way: the built-in Photo Picker for your
+  gallery, or "Pick from Files" (the Storage Access Framework document picker)
+  to reach anything in Files, Downloads, an SD card or a synced cloud folder.
+  The Files path matters for HEIC especially — the Photo Picker only surfaces
+  "visual media" the gallery has indexed, so HEICs sitting in Files often do
+  not show up there.
 
 Once a batch is done, there are three ways to get the clean copies out:
 "Save to Pictures" drops them straight into the `Pictures/ScrubPony`

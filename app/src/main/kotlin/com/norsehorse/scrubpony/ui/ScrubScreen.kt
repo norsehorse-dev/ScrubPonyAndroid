@@ -42,6 +42,7 @@ import java.io.File
 fun ScrubScreen(
     viewModel: ScrubViewModel,
     onPickImages: () -> Unit,
+    onPickFiles: () -> Unit,
     onShareResults: (List<File>) -> Unit,
     onSaveResults: (List<File>) -> Unit,
     onSaveToFiles: (List<File>) -> Unit,
@@ -71,7 +72,7 @@ fun ScrubScreen(
             Spacer(Modifier.height(16.dp))
 
             when (val s = state) {
-                is UiState.Idle -> IdleContent(onPickImages)
+                is UiState.Idle -> IdleContent(onPickImages, onPickFiles)
                 is UiState.Processing -> ProcessingContent(s)
                 is UiState.Done -> DoneContent(
                     summary = s.summary,
@@ -97,14 +98,26 @@ private fun OptionsRow(label: String, checked: Boolean, onCheckedChange: (Boolea
 }
 
 @Composable
-private fun IdleContent(onPickImages: () -> Unit) {
+private fun IdleContent(onPickImages: () -> Unit, onPickFiles: () -> Unit) {
     Text(
         "Pick photos to strip GPS, timestamps, device info and embedded " +
-            "thumbnails — pixels untouched. Or share photos into ScrubPony " +
+            "thumbnails, pixels untouched. Or share photos into ScrubPony " +
             "from any other app's share sheet.",
     )
     Spacer(Modifier.height(16.dp))
-    Button(onClick = onPickImages) { Text("Choose photos") }
+    Button(onClick = onPickImages, modifier = Modifier.fillMaxWidth()) {
+        Text("Choose photos")
+    }
+    Spacer(Modifier.height(8.dp))
+    OutlinedButton(onClick = onPickFiles, modifier = Modifier.fillMaxWidth()) {
+        Text("Pick from Files")
+    }
+    Spacer(Modifier.height(8.dp))
+    Text(
+        "The photo picker shows your gallery. Use \"Pick from Files\" to reach " +
+            "HEICs and anything stored in Files, Downloads, or on an SD card.",
+        style = MaterialTheme.typography.bodySmall,
+    )
 }
 
 @Composable
