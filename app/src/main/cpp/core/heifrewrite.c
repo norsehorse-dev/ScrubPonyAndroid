@@ -145,9 +145,9 @@ typedef struct {
 } kept_item;
 
 typedef struct {
-    kept_item kept[64];
+    kept_item kept[SP_HEIF_ITEMS_CAP];
     uint32_t  kept_count;
-    uint32_t  dropped_ids[64];
+    uint32_t  dropped_ids[SP_HEIF_ITEMS_CAP];
     uint32_t  dropped_count;
     unsigned  base_offset_size; /* 4 or 8, chosen from the file size         */
     unsigned  length_size;      /* 4 or 8, chosen from the largest item      */
@@ -271,7 +271,7 @@ static bool emit_iref(mbuf *b, const sp_heif_meta *m, const rw_plan *pl)
 
     for (i = 0; i < m->ref_count; i++) {
         const sp_heif_ref *r = &m->refs[i];
-        uint32_t survivors[16];
+        uint32_t survivors[SP_HEIF_REF_TO_CAP];
         uint32_t nsurv = 0;
         size_t rsz_at;
 
@@ -371,8 +371,12 @@ sp_status sp_heif_rewrite(sp_file *in, sp_out *out, const sp_policy *pol,
     int meta_idx = -1;
     int mdat_idx = -1;
     bool have;
-    sp_heif_meta m;
-    rw_plan pl;
+    /* Large (hundreds of KB with the grid-sized caps) and this rewriter is
+     * already non-reentrant — it uses the static g_meta_buf below — so these
+     * live in static storage rather than blowing the stack. memset'd on entry,
+     * so nothing leaks between calls. */
+    static sp_heif_meta m;
+    static rw_plan pl;
     mbuf mb;
     uint64_t mdat_body_start, mdat_hdr_len;
     uint64_t new_mdat_offset, new_mdat_body_start, new_mdat_size;

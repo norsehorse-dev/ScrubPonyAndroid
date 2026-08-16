@@ -62,6 +62,22 @@
 #define SP_HEIF_MAX_EXTENTS 100000u
 #define SP_HEIF_MAX_REFS 100000u
 
+/* Inline-array sizes for the parsed meta box. These have to be generous, not
+ * minimal, because a phone camera does not store a photo as one image: it
+ * stores a `grid` derived image over many `hvc1` tiles, plus a thumbnail, plus
+ * a depth or gain-map aux image, each its own item. A 48MP capture is on the
+ * order of 200 tiles, a 200MP one around 800, and the grid's `dimg` reference
+ * lists every tile id in one go. SP_HEIF_ITEMS_CAP and SP_HEIF_REF_TO_CAP are
+ * sized so real phone HEICs fit comfortably; a file past these still parses,
+ * but sets a too_many_* flag and is refused by the rewriter rather than
+ * risking a truncated item table. Because the resulting sp_heif_meta is large
+ * (hundreds of KB), callers hold it as a static, not on the stack. */
+#define SP_HEIF_ITEMS_CAP  2048u  /* items in one file (grid tiles + aux)     */
+#define SP_HEIF_REF_TO_CAP 2048u  /* to-ids in one reference (a grid's dimg)  */
+#define SP_HEIF_EXTENTS_CAP  16u  /* extents in one item (almost always 1)    */
+#define SP_HEIF_BOXES_CAP    64u  /* meta's direct children (a fixed set)     */
+#define SP_HEIF_REFS_CAP     64u  /* reference boxes in iref (dimg/thmb/...)  */
+
 /* One box, as produced by the top-level iterator. */
 typedef struct {
     char     type[5];   /* 4-character box type, NUL-terminated             */
@@ -98,7 +114,7 @@ typedef struct {
     uint16_t       data_ref_index; /* iloc data_reference_index             */
     uint64_t       base_offset;    /* iloc base_offset                      */
     uint32_t       extent_count;
-    sp_heif_extent extents[8];     /* inline; overflow sets too_many_extents */
+    sp_heif_extent extents[SP_HEIF_EXTENTS_CAP]; /* overflow sets too_many_extents */
     bool           too_many_extents;
     bool           have_location;  /* an iloc entry matched this id         */
 } sp_heif_item;
@@ -110,21 +126,21 @@ typedef struct {
     char     type[5];
     uint32_t from_id;
     uint32_t to_count;
-    uint32_t to_ids[16];   /* inline; overflow sets too_many */
+    uint32_t to_ids[SP_HEIF_REF_TO_CAP]; /* overflow sets too_many */
     bool     too_many;
 } sp_heif_ref;
 
 /* The whole parsed meta box, loaded at once. */
 typedef struct {
-    sp_heif_box  boxes[64];    /* meta's direct children, in file order     */
+    sp_heif_box  boxes[SP_HEIF_BOXES_CAP]; /* meta's direct children, in order */
     uint32_t     box_count;
     bool         too_many_boxes;
 
-    sp_heif_item items[64];
+    sp_heif_item items[SP_HEIF_ITEMS_CAP];
     uint32_t     item_count;
     bool         too_many_items;
 
-    sp_heif_ref  refs[64];
+    sp_heif_ref  refs[SP_HEIF_REFS_CAP];
     uint32_t     ref_count;
     bool         too_many_refs;
 
