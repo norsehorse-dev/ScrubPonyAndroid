@@ -27,11 +27,20 @@
  * simple-format WebP gets — no structural surgery happens unless something is
  * actually being removed.
  *
- * Layouts this version does not rewrite (item data outside a single `mdat`,
- * `idat`/construction-method item data, external data references, or item
- * tables larger than the reader models) are refused with SP_ERR_UNSUPPORTED
- * and the file is left untouched. That is the safe answer: a partial or
- * mis-offset HEIC is far worse than an unscrubbed one.
+ * Real phone HEICs, iPhone ones especially, are handled: the photo is a
+ * `grid` derived image over dozens of `hvc1` tiles, often with an HDR gain
+ * map (`tmap`) and an entity group (`grpl`), and the grid and tmap derivation
+ * headers live in an `idat` box addressed by iloc construction method 1. The
+ * idat box is copied through verbatim, so those items' offsets never move and
+ * are re-emitted unchanged; only the construction-0 items in `mdat` are
+ * repacked and re-offset. The rebuilt iloc is written as version 1 so the two
+ * construction methods can coexist in it.
+ *
+ * Layouts this version still does not rewrite (item data outside a single
+ * `mdat` and the one `idat`, construction method 2, external data references,
+ * or item tables larger than the reader models) are refused with
+ * SP_ERR_UNSUPPORTED and the file is left untouched. That is the safe answer:
+ * a partial or mis-offset HEIC is far worse than an unscrubbed one.
  */
 #ifndef SP_HEIFREWRITE_H
 #define SP_HEIFREWRITE_H

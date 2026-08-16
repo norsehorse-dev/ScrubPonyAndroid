@@ -139,9 +139,14 @@ static sp_status mb_copy_from_file(mbuf *b, sp_file *in, uint64_t off, uint64_t 
 
 typedef struct {
     uint32_t id;
-    uint64_t new_base;   /* new absolute file offset of this item's data     */
-    uint64_t total_len;  /* sum of the item's extent lengths                 */
-    uint64_t src_start;  /* original absolute data start (for ordering)      */
+    uint8_t  construction; /* iloc construction method: 0 = mdat, 1 = idat    */
+    uint64_t new_base;   /* value written as the item's extent_offset. For a
+                          * construction-0 item this is its new absolute file
+                          * offset in the repacked mdat; for construction-1 it
+                          * is the original idat-relative offset, unchanged.   */
+    uint64_t total_len;  /* the item's extent_length in the output            */
+    uint64_t src_start;  /* original absolute data start (mdat ordering); 0
+                          * for construction-1 items, which are not packed.    */
 } kept_item;
 
 typedef struct {
@@ -220,24 +225,29 @@ static void emit_iloc(mbuf *b, const rw_plan *pl)
 {
     size_t sz_at;
     uint32_t i;
+    unsigned off_size = pl->base_offset_size; /* holds the largest offset      */
 
     sz_at = b->len;
     mb_be(b, 0u, 4u);        /* size, backpatched */
     mb_tag(b, "iloc");
-    mb_be(b, 0u, 4u);        /* version 0, flags 0 */
-    /* offset_size=4, length_size=pl->length_size */
-    mb_be(b, (uint64_t)((4u << 4) | (pl->length_size & 0x0Fu)), 1u);
-    /* base_offset_size=pl->base_offset_size, index_size=0 */
-    mb_be(b, (uint64_t)((pl->base_offset_size << 4) | 0u), 1u);
-    mb_be(b, pl->kept_count, 2u);   /* item_count (version 0: 16-bit) */
+    /* Version 1: unlike version 0 it carries a per-item construction_method,
+     * which is what lets a construction-1 (idat) item and a construction-0
+     * (mdat) item coexist in one rebuilt table. */
+    mb_be(b, ((uint64_t)1u << 24), 4u); /* version 1, flags 0 */
+    /* offset_size holds the offset, length_size the length; base_offset_size
+     * is 0 (every offset is carried whole in the extent, no split base). */
+    mb_be(b, (uint64_t)((off_size << 4) | (pl->length_size & 0x0Fu)), 1u);
+    mb_be(b, 0u, 1u);               /* base_offset_size=0, index_size=0 */
+    mb_be(b, pl->kept_count, 2u);   /* item_count (version 1: 16-bit) */
 
     for (i = 0; i < pl->kept_count; i++) {
         const kept_item *k = &pl->kept[i];
         mb_be(b, k->id, 2u);                        /* item_id */
+        mb_be(b, (uint64_t)(k->construction & 0x0Fu), 2u); /* reserved+method */
         mb_be(b, 0u, 2u);                           /* data_reference_index */
-        mb_be(b, k->new_base, pl->base_offset_size);/* base_offset */
+        /* base_offset: base_offset_size is 0, so nothing is written */
         mb_be(b, 1u, 2u);                           /* extent_count */
-        mb_be(b, 0u, 4u);                           /* extent_offset (offset_size=4) */
+        mb_be(b, k->new_base, off_size);            /* extent_offset */
         mb_be(b, k->total_len, pl->length_size);    /* extent_length */
     }
 
@@ -442,10 +452,13 @@ sp_status sp_heif_rewrite(sp_file *in, sp_out *out, const sp_policy *pol,
             fputc('\n', listing);
         }
 
-        /* Every located item must be a plain in-file, single-reference,
-         * construction-0 item for this rewriter to be safe. */
+        /* Every located item must live in this file (data_reference_index 0)
+         * and use a construction method this rewriter handles: 0 (bytes in an
+         * mdat, repacked and re-offset) or 1 (bytes in the idat box, which is
+         * copied verbatim so the offset never moves). Method 2 (offset into
+         * another item) and external references are refused. */
         if (item->have_location) {
-            if (item->construction != 0u || item->data_ref_index != 0u ||
+            if (item->construction > 1u || item->data_ref_index != 0u ||
                 item->too_many_extents)
                 return SP_ERR_UNSUPPORTED;
         }
@@ -484,11 +497,27 @@ sp_status sp_heif_rewrite(sp_file *in, sp_out *out, const sp_policy *pol,
 
         if (pl.kept_count >= (uint32_t)(sizeof pl.kept / sizeof pl.kept[0]))
             return SP_ERR_UNSUPPORTED;
-        pl.kept[pl.kept_count].id = item->id;
-        pl.kept[pl.kept_count].total_len = total;
-        pl.kept[pl.kept_count].src_start =
-            item->base_offset + (item->extent_count > 0u ? item->extents[0].offset : 0u);
-        pl.kept[pl.kept_count].new_base = 0u; /* filled after sizing */
+        {
+            kept_item *k = &pl.kept[pl.kept_count];
+            k->id = item->id;
+            k->construction = item->construction;
+            if (item->construction == 1u) {
+                /* Data is in the idat box, addressed relative to it. The idat
+                 * box is copied verbatim, so this offset stays valid and is
+                 * re-emitted unchanged; the item is not packed into mdat. A
+                 * single extent is all real idat items use. */
+                if (item->extent_count != 1u)
+                    return SP_ERR_UNSUPPORTED;
+                k->new_base = item->base_offset + item->extents[0].offset;
+                k->total_len = item->extents[0].length;
+                k->src_start = 0u;
+            } else {
+                k->total_len = total;
+                k->src_start = item->base_offset +
+                    (item->extent_count > 0u ? item->extents[0].offset : 0u);
+                k->new_base = 0u; /* assigned during mdat layout */
+            }
+        }
         pl.kept_count++;
     }
 
@@ -518,12 +547,16 @@ sp_status sp_heif_rewrite(sp_file *in, sp_out *out, const sp_policy *pol,
     pl.base_offset_size = (in->size > 0xFFFFFFFFu) ? 8u : 4u;
     pl.length_size = (max_item_len > 0xFFFFFFFFu) ? 8u : 4u;
 
-    /* --- find the single mdat that holds every kept item's data --- */
+    /* --- find the single mdat that holds every construction-0 kept item's
+     *     data (construction-1 items live in idat, inside meta) --- */
     for (i = 0; i < pl.kept_count; i++) {
-        uint64_t s = pl.kept[i].src_start;
-        uint64_t end = s + pl.kept[i].total_len;
+        uint64_t s, end;
         int found = -1;
         uint32_t j;
+        if (pl.kept[i].construction != 0u)
+            continue; /* idat item: not in any mdat */
+        s = pl.kept[i].src_start;
+        end = s + pl.kept[i].total_len;
         for (j = 0; j < top_count; j++) {
             uint64_t bs = top[j].body_off;
             uint64_t be = top[j].offset + top[j].size;
@@ -581,6 +614,10 @@ sp_status sp_heif_rewrite(sp_file *in, sp_out *out, const sp_policy *pol,
     {
         uint64_t cursor = new_mdat_body_start;
         for (i = 0; i < pl.kept_count; i++) {
+            /* Only construction-0 items are packed into mdat and get a new
+             * offset; construction-1 items keep their idat-relative one. */
+            if (pl.kept[i].construction != 0u)
+                continue;
             pl.kept[i].new_base = cursor;
             cursor += pl.kept[i].total_len;
         }
@@ -638,11 +675,14 @@ sp_status sp_heif_rewrite(sp_file *in, sp_out *out, const sp_policy *pol,
             }
             if (st != SP_OK)
                 return st;
-            /* Kept items' data, packed contiguously in the ordered layout. */
+            /* Construction-0 kept items' data, packed contiguously in the
+             * ordered layout. Construction-1 items are skipped: their bytes
+             * stay in the idat box, which rode along inside the rebuilt meta. */
             for (j = 0; j < pl.kept_count; j++) {
-                /* Copy this item's extents from the input in order. Re-find
-                 * the source item to walk its extents. */
                 uint32_t q;
+                if (pl.kept[j].construction != 0u)
+                    continue;
+                /* Re-find the source item to walk its extents. */
                 for (q = 0; q < m.item_count; q++) {
                     const sp_heif_item *item = &m.items[q];
                     uint32_t e;
