@@ -10,9 +10,19 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # the two never drift apart.
 add_library(scrubpony_jni SHARED
     scrubpony_jni.c
+    core/crc32.c
     core/exif.c
     core/io.c
     core/jpeg.c
+    core/png.c
+    core/pngpolicy.c
+    core/pngrewrite.c
+    core/webp.c
+    core/webppolicy.c
+    core/webprewrite.c
+    core/heif.c
+    core/heifpolicy.c
+    core/heifrewrite.c
     core/policy.c
     core/report.c
     core/rewrite.c

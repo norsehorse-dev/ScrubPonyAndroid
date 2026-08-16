@@ -167,6 +167,98 @@ void sp_report_decision(FILE *out, const sp_segment *seg, const sp_decision *d)
     fputc('\n', out);
 }
 
+void sp_report_png_chunk(FILE *out, const sp_png_chunk *chunk)
+{
+    if (out == NULL || chunk == NULL)
+        return;
+
+    fprintf(out, "  0x%08llx  %-6s  %8lu\n",
+            (unsigned long long)chunk->offset, chunk->type,
+            (unsigned long)chunk->length);
+}
+
+void sp_report_png_decision(FILE *out, const sp_png_chunk *chunk,
+                            const sp_png_decision *d)
+{
+    if (out == NULL || chunk == NULL || d == NULL)
+        return;
+
+    fprintf(out, "  %-6s  %-6s  %8lu  %s",
+            (d->action == SP_DROP) ? "drop" : "keep",
+            chunk->type,
+            (unsigned long)chunk->length,
+            d->label);
+
+    if (d->reason != NULL && d->reason[0] != '\0')
+        fprintf(out, "  (%s)", d->reason);
+
+    fputc('\n', out);
+}
+
+void sp_report_webp_chunk(FILE *out, const sp_webp_chunk *chunk)
+{
+    if (out == NULL || chunk == NULL)
+        return;
+
+    fprintf(out, "  0x%08llx  %-6s  %8lu\n",
+            (unsigned long long)chunk->offset, chunk->fourcc,
+            (unsigned long)chunk->length);
+}
+
+void sp_report_webp_decision(FILE *out, const sp_webp_chunk *chunk,
+                             const sp_webp_decision *d)
+{
+    if (out == NULL || chunk == NULL || d == NULL)
+        return;
+
+    fprintf(out, "  %-6s  %-6s  %8lu  %s",
+            (d->action == SP_DROP) ? "drop" : "keep",
+            chunk->fourcc,
+            (unsigned long)chunk->length,
+            d->label);
+
+    if (d->reason != NULL && d->reason[0] != '\0')
+        fprintf(out, "  (%s)", d->reason);
+
+    fputc('\n', out);
+}
+
+static unsigned long heif_item_length(const sp_heif_item *item)
+{
+    uint64_t total = 0;
+    uint32_t e;
+    for (e = 0; e < item->extent_count; e++)
+        total += item->extents[e].length;
+    return (unsigned long)total;
+}
+
+void sp_report_heif_item(FILE *out, const sp_heif_item *item)
+{
+    if (out == NULL || item == NULL)
+        return;
+
+    fprintf(out, "  %6lu  %-6s  %8lu\n",
+            (unsigned long)item->id, item->type, heif_item_length(item));
+}
+
+void sp_report_heif_decision(FILE *out, const sp_heif_item *item,
+                             const sp_heif_decision *d)
+{
+    if (out == NULL || item == NULL || d == NULL)
+        return;
+
+    fprintf(out, "  %-6s  %-6s  %8lu  %s",
+            (d->action == SP_DROP) ? "drop" : "keep",
+            item->type,
+            heif_item_length(item),
+            d->label);
+
+    if (d->reason != NULL && d->reason[0] != '\0')
+        fprintf(out, "  (%s)", d->reason);
+
+    fputc('\n', out);
+}
+
 void sp_report_exif(FILE *out, const sp_exif_info *info)
 {
     if (out == NULL || info == NULL || !info->valid)

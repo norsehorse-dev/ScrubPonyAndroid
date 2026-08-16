@@ -9,10 +9,16 @@
 #include <stdio.h>
 
 #include "exif.h"
+#include "heif.h"
+#include "heifpolicy.h"
 #include "io.h"
 #include "jpeg.h"
+#include "png.h"
 #include "policy.h"
+#include "pngpolicy.h"
 #include "scrubpony.h"
+#include "webp.h"
+#include "webppolicy.h"
 
 /* Canonical short name for a marker code: "SOI", "APP1", "SOF2", "DQT",
  * "RST3", "COM". Never NULL; unknown codes come back as "?". */
@@ -32,7 +38,32 @@ void sp_report_decision_header(FILE *out);
 void sp_report_decision(FILE *out, const sp_segment *seg,
                         const sp_decision *d);
 
-/* What the EXIF block was carrying, for the dry run. */
+/* PNG counterparts. Deliberately separate functions rather than a shared one
+ * templated on some union of sp_segment and sp_png_chunk: the two shapes
+ * only coincidentally have similar fields (a marker/type and a length), and
+ * forcing them through one signature would be the same mistake the project
+ * already avoids elsewhere — see policy.h on the marker code never being
+ * enough to decide anything by itself. sp_report_decision_header()'s column
+ * layout is generic enough to head either table, so it is shared as-is. */
+void sp_report_png_chunk(FILE *out, const sp_png_chunk *chunk);
+void sp_report_png_decision(FILE *out, const sp_png_chunk *chunk,
+                            const sp_png_decision *d);
+
+/* WebP counterparts, same reasoning as the PNG ones above. */
+void sp_report_webp_chunk(FILE *out, const sp_webp_chunk *chunk);
+void sp_report_webp_decision(FILE *out, const sp_webp_chunk *chunk,
+                             const sp_webp_decision *d);
+
+/* HEIC counterparts. A HEIC's unit is the item, not a chunk, so these take an
+ * sp_heif_item; the "length" column shows the item's total data length summed
+ * across its extents. */
+void sp_report_heif_item(FILE *out, const sp_heif_item *item);
+void sp_report_heif_decision(FILE *out, const sp_heif_item *item,
+                             const sp_heif_decision *d);
+
+/* What the EXIF block was carrying, for the dry run. Format-agnostic: PNG's
+ * eXIf chunk, WebP's EXIF chunk and JPEG's APP1 EXIF all scan into the same
+ * sp_exif_info. */
 void sp_report_exif(FILE *out, const sp_exif_info *info);
 
 /* The orientation warning from section 5 of the plan. Goes to stderr with a

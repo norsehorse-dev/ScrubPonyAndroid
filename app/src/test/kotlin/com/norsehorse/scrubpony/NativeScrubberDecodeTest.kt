@@ -11,8 +11,8 @@ import org.junit.Test
 class NativeScrubberDecodeTest {
 
     @Test
-    fun decodesASuccessfulScrubWithGpsAndOrientation() {
-        val raw = longArrayOf(0, 3, 5, 12000, 8000, 1, 1, 1)
+    fun decodesASuccessfulJpegScrubWithGpsAndOrientation() {
+        val raw = longArrayOf(0, 3, 5, 12000, 8000, 1, 1, 1, 0)
         val stats = decodeScrubStats(raw)
 
         assertEquals(NativeScrubber.SP_OK, stats.status)
@@ -23,11 +23,55 @@ class NativeScrubberDecodeTest {
         assertTrue(stats.hasGps)
         assertTrue(stats.orientationMatters)
         assertTrue(stats.orientationKept)
+        assertEquals(ImageFormat.JPEG, stats.format)
+    }
+
+    @Test
+    fun decodesASuccessfulPngScrub() {
+        val raw = longArrayOf(0, 7, 3, 2395, 115, 1, 1, 1, 1)
+        val stats = decodeScrubStats(raw)
+
+        assertEquals(NativeScrubber.SP_OK, stats.status)
+        assertEquals(7L, stats.dropped)
+        assertEquals(ImageFormat.PNG, stats.format)
+    }
+
+    @Test
+    fun decodesASuccessfulWebpScrub() {
+        val raw = longArrayOf(0, 2, 3, 2178, 470, 1, 0, 0, 2)
+        val stats = decodeScrubStats(raw)
+
+        assertEquals(NativeScrubber.SP_OK, stats.status)
+        assertEquals(2L, stats.dropped)
+        assertEquals(ImageFormat.WEBP, stats.format)
+    }
+
+    @Test
+    fun decodesASuccessfulHeicScrubKeepingOrientation() {
+        val raw = longArrayOf(0, 2, 1, 2616, 457, 1, 1, 1, 3)
+        val stats = decodeScrubStats(raw)
+
+        assertEquals(NativeScrubber.SP_OK, stats.status)
+        assertEquals(2L, stats.dropped)
+        assertEquals(1L, stats.kept)
+        assertTrue(stats.orientationKept)
+        assertEquals(ImageFormat.HEIC, stats.format)
+    }
+
+    @Test
+    fun decodesAnUnsupportedHeicLayout() {
+        // The native side identified the HEIC (format code 3) but refused the
+        // layout, so the format is still meaningful on this failure.
+        val raw = longArrayOf(NativeScrubber.SP_ERR_UNSUPPORTED.toLong(), 0, 0, 0, 0, 0, 0, 0, 3)
+        val stats = decodeScrubStats(raw)
+
+        assertEquals(NativeScrubber.SP_ERR_UNSUPPORTED, stats.status)
+        assertEquals(ImageFormat.HEIC, stats.format)
     }
 
     @Test
     fun decodesAnAlreadyCleanFileWithNoGps() {
-        val raw = longArrayOf(0, 0, 6, 8000, 8000, 0, 0, 0)
+        val raw = longArrayOf(0, 0, 6, 8000, 8000, 0, 0, 0, 0)
         val stats = decodeScrubStats(raw)
 
         assertEquals(0L, stats.dropped)
@@ -37,10 +81,10 @@ class NativeScrubberDecodeTest {
 
     @Test
     fun decodesAnErrorStatus() {
-        val raw = longArrayOf(2, 0, 0, 0, 0, 0, 0, 0)
+        val raw = longArrayOf(NativeScrubber.SP_ERR_NOT_PNG.toLong(), 0, 0, 0, 0, 0, 0, 0, 0)
         val stats = decodeScrubStats(raw)
 
-        assertEquals(NativeScrubber.SP_ERR_NOT_JPEG, stats.status)
+        assertEquals(NativeScrubber.SP_ERR_NOT_PNG, stats.status)
     }
 
     @Test(expected = IllegalArgumentException::class)

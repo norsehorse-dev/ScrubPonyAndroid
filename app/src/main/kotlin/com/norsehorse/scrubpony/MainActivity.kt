@@ -20,6 +20,15 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.PickMultipleVisualMedia(50),
     ) { uris -> if (uris.isNotEmpty()) viewModel.scrub(uris) }
 
+    // OpenDocumentTree takes no input and hands back a folder Uri on success
+    // (null if the user backed out), so the files it should save are stashed
+    // here between the launch call and the picker's result arriving.
+    private var pendingSaveToFiles: List<File> = emptyList()
+
+    private val pickSaveFolder = registerForActivityResult(
+        ActivityResultContracts.OpenDocumentTree(),
+    ) { treeUri -> if (treeUri != null) saveToFiles(treeUri, pendingSaveToFiles) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -36,6 +45,10 @@ class MainActivity : ComponentActivity() {
                     },
                     onShareResults = { files -> shareResults(files) },
                     onSaveResults = { files -> saveResults(files) },
+                    onSaveToFiles = { files ->
+                        pendingSaveToFiles = files
+                        pickSaveFolder.launch(null)
+                    },
                 )
             }
         }
@@ -85,5 +98,10 @@ class MainActivity : ComponentActivity() {
 
     private fun saveResults(files: List<File>) {
         files.forEach { SaveExporter.saveToGallery(this, it, it.name) }
+    }
+
+    private fun saveToFiles(treeUri: Uri, files: List<File>) {
+        if (files.isEmpty()) return
+        SaveExporter.saveToTree(this, treeUri, files)
     }
 }

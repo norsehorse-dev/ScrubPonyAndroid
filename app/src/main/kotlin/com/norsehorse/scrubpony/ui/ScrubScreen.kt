@@ -44,6 +44,7 @@ fun ScrubScreen(
     onPickImages: () -> Unit,
     onShareResults: (List<File>) -> Unit,
     onSaveResults: (List<File>) -> Unit,
+    onSaveToFiles: (List<File>) -> Unit,
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -77,6 +78,7 @@ fun ScrubScreen(
                     onReset = viewModel::reset,
                     onShareResults = onShareResults,
                     onSaveResults = onSaveResults,
+                    onSaveToFiles = onSaveToFiles,
                 )
             }
         }
@@ -119,6 +121,7 @@ private fun DoneContent(
     onReset: () -> Unit,
     onShareResults: (List<File>) -> Unit,
     onSaveResults: (List<File>) -> Unit,
+    onSaveToFiles: (List<File>) -> Unit,
 ) {
     val outputs = summary.results.mapNotNull { it.outputFile }
 
@@ -128,9 +131,17 @@ private fun DoneContent(
         Button(onClick = { onSaveResults(outputs) }, enabled = outputs.isNotEmpty()) {
             Text("Save to Pictures")
         }
-        OutlinedButton(onClick = { onShareResults(outputs) }, enabled = outputs.isNotEmpty()) {
-            Text("Share clean copies")
+        OutlinedButton(onClick = { onSaveToFiles(outputs) }, enabled = outputs.isNotEmpty()) {
+            Text("Save to files")
         }
+    }
+    Spacer(Modifier.height(8.dp))
+    OutlinedButton(
+        onClick = { onShareResults(outputs) },
+        enabled = outputs.isNotEmpty(),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text("Share clean copies")
     }
     Spacer(Modifier.height(8.dp))
     TextButton(onClick = onReset) { Text("Start over") }
@@ -146,7 +157,7 @@ private fun SummaryCard(summary: BatchSummary) {
         Column(Modifier.padding(16.dp)) {
             Text(
                 "${summary.scrubbed} scrubbed, ${summary.alreadyClean} already clean, " +
-                    "${summary.notJpeg} not JPEG, ${summary.failed} failed",
+                    "${summary.unsupported} unsupported, ${summary.failed} failed",
                 style = MaterialTheme.typography.titleMedium,
             )
             if (summary.bytesRemoved > 0) {
@@ -171,7 +182,7 @@ private fun ResultRow(result: ScrubItemResult) {
             val label = when (result.outcome) {
                 FileOutcome.SCRUBBED -> "Scrubbed"
                 FileOutcome.ALREADY_CLEAN -> "Clean"
-                FileOutcome.NOT_JPEG -> "Not JPEG"
+                FileOutcome.UNSUPPORTED -> "Not supported"
                 FileOutcome.FAILED -> "Failed"
             }
             Text(label)

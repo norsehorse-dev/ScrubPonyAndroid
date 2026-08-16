@@ -7,7 +7,7 @@ import android.provider.OpenableColumns
 import java.io.File
 import java.util.UUID
 
-enum class FileOutcome { SCRUBBED, ALREADY_CLEAN, NOT_JPEG, FAILED }
+enum class FileOutcome { SCRUBBED, ALREADY_CLEAN, UNSUPPORTED, FAILED }
 
 data class ScrubItemResult(
     val displayName: String,
@@ -22,7 +22,7 @@ data class ScrubItemResult(
 data class BatchSummary(val results: List<ScrubItemResult>) {
     val scrubbed get() = results.count { it.outcome == FileOutcome.SCRUBBED }
     val alreadyClean get() = results.count { it.outcome == FileOutcome.ALREADY_CLEAN }
-    val notJpeg get() = results.count { it.outcome == FileOutcome.NOT_JPEG }
+    val unsupported get() = results.count { it.outcome == FileOutcome.UNSUPPORTED }
     val failed get() = results.count { it.outcome == FileOutcome.FAILED }
     val bytesRemoved get() = results.sumOf { it.bytesRemoved }
     val withGps get() = results.count { it.hasGps }
@@ -73,6 +73,10 @@ class ScrubEngine(private val context: Context) {
 
         val baseName = displayName.substringBeforeLast('.', displayName).ifBlank { "photo" }
         val suffix = UUID.randomUUID().toString().take(8)
+        // The extension has to be a guess before the native side has looked
+        // at the bytes — it renames the output below once the real format is
+        // known, rather than trusting the input's claimed extension the way
+        // the desktop CLI's probe deliberately never does either.
         val outputFile = File(outputDir, "$baseName-scrubbed-$suffix.jpg")
 
         val raw = NativeScrubber.scrubFile(
@@ -86,17 +90,44 @@ class ScrubEngine(private val context: Context) {
 
         if (stats.status != NativeScrubber.SP_OK) {
             outputFile.delete()
-            val outcome = if (stats.status == NativeScrubber.SP_ERR_NOT_JPEG) {
-                FileOutcome.NOT_JPEG
-            } else {
-                FileOutcome.FAILED
-            }
-            val message = if (stats.status == NativeScrubber.SP_ERR_NOT_JPEG) {
-                "not a JPEG, skipped"
-            } else {
-                NativeScrubber.statusMessage(stats.status)
+            val unrecognisedFormat = stats.status == NativeScrubber.SP_ERR_NOT_JPEG ||
+                stats.status == NativeScrubber.SP_ERR_NOT_PNG ||
+                stats.status == NativeScrubber.SP_ERR_NOT_WEBP ||
+                stats.status == NativeScrubber.SP_ERR_NOT_HEIF
+            // SP_ERR_UNSUPPORTED is different: the format WAS recognised (a
+            // valid HEIC), but its layout is one the rewriter will not touch,
+            // so the original is left exactly as it was.
+            val unsupportedLayout = stats.status == NativeScrubber.SP_ERR_UNSUPPORTED
+            val skipped = unrecognisedFormat || unsupportedLayout
+            val outcome = if (skipped) FileOutcome.UNSUPPORTED else FileOutcome.FAILED
+            val message = when {
+                unrecognisedFormat -> "not a JPEG, PNG, WebP, or HEIC, skipped"
+                unsupportedLayout -> "unsupported HEIC layout, left unchanged"
+                else -> NativeScrubber.statusMessage(stats.status)
             }
             return ScrubItemResult(displayName, outcome, message, null, 0, false, false)
+        }
+
+        // Now that the native side knows what it actually wrote, rename the
+        // output to match — a PNG named "photo-scrubbed-xxxx.jpg" would still
+        // decode fine (the bytes are what they are), but it is the kind of
+        // mismatch that confuses a gallery app or a person double-checking
+        // the file later.
+        val ext = when (stats.format) {
+            ImageFormat.PNG -> "png"
+            ImageFormat.WEBP -> "webp"
+            ImageFormat.HEIC -> "heic"
+            ImageFormat.JPEG -> null
+        }
+        val finalFile = if (ext != null) {
+            File(outputDir, "$baseName-scrubbed-$suffix.$ext").also { outputFile.renameTo(it) }
+        } else {
+            outputFile
+        }
+        val unit = when (stats.format) {
+            ImageFormat.JPEG -> "segment"
+            ImageFormat.HEIC -> "item"
+            else -> "chunk"
         }
 
         val removed = (stats.inSize - stats.outSize).coerceAtLeast(0)
@@ -104,10 +135,10 @@ class ScrubEngine(private val context: Context) {
         val message = if (outcome == FileOutcome.ALREADY_CLEAN) {
             "already clean"
         } else {
-            "removed ${stats.dropped} segment${if (stats.dropped == 1L) "" else "s"}, $removed bytes"
+            "removed ${stats.dropped} $unit${if (stats.dropped == 1L) "" else "s"}, $removed bytes"
         }
 
-        return ScrubItemResult(displayName, outcome, message, outputFile, removed, stats.hasGps, stats.orientationKept)
+        return ScrubItemResult(displayName, outcome, message, finalFile, removed, stats.hasGps, stats.orientationKept)
     }
 
     private fun queryDisplayName(resolver: ContentResolver, uri: Uri): String? {

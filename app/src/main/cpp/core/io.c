@@ -13,9 +13,13 @@ const char *sp_strstatus(sp_status s)
     case SP_OK:             return "ok";
     case SP_ERR_IO:         return "i/o error";
     case SP_ERR_NOT_JPEG:   return "not a JPEG";
+    case SP_ERR_NOT_PNG:    return "not a PNG";
+    case SP_ERR_NOT_WEBP:   return "not a WebP";
+    case SP_ERR_NOT_HEIF:   return "not a HEIC";
     case SP_ERR_NOT_REGULAR:return "not a regular file";
     case SP_ERR_TRUNCATED:  return "truncated";
     case SP_ERR_MALFORMED:  return "malformed";
+    case SP_ERR_UNSUPPORTED:return "unsupported layout";
     case SP_ERR_EXISTS:     return "output already exists (use -f)";
     case SP_ERR_OUTPUT_GREW:return "output would be larger than input";
     case SP_ERR_USAGE:      return "usage error";
