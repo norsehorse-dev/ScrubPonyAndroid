@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ScrubPony</string>
+    <string name="share_target_label">Scrub metadata</string>
+    <string name="share_chooser_title">Share clean photos</string>
+</resources>

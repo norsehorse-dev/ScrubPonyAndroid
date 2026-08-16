@@ -1,0 +1,5 @@
+<resources>
+    <!-- Plain platform theme: Compose owns all real theming (see Theme.kt).
+         This just sets a sane window background before the first frame. -->
+    <style name="Theme.ScrubPony" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
