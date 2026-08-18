@@ -1,5 +1,11 @@
 <resources>
-    <!-- Plain platform theme: Compose owns all real theming (see Theme.kt).
-         This just sets a sane window background before the first frame. -->
-    <style name="Theme.ScrubPony" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Compose owns all real theming (see Theme.kt). This platform theme just
+         sets a dark window background before the first frame and gives
+         AppCompatActivity the Theme.AppCompat ancestor it requires for the
+         per-app language backport. -->
+    <style name="Theme.ScrubPony" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@color/scrub_background</item>
+        <item name="android:statusBarColor">@color/scrub_background</item>
+        <item name="android:navigationBarColor">@color/scrub_background</item>
+    </style>
 </resources>

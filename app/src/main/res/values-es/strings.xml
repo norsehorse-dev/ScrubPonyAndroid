@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_target_label">Eliminar metadatos</string>
+    <string name="share_chooser_title">Compartir fotos limpias</string>
+
+    <string name="nav_scrub">Limpiar</string>
+    <string name="nav_settings">Ajustes</string>
+
+    <string name="scrub_tagline">Conserva la foto. Deshazte de los metadatos.</string>
+    <string name="scrub_headline">Elimina los datos ocultos</string>
+    <string name="scrub_pick_hint">Se eliminan el GPS, las marcas de tiempo, la información del dispositivo y las miniaturas incrustadas. Los píxeles quedan exactamente como estaban.</string>
+    <string name="scrub_choose_photos">Elegir fotos</string>
+    <string name="scrub_pick_from_files">Elegir de Archivos</string>
+    <string name="scrub_files_note">El selector de fotos muestra tu galería. Usa Elegir de Archivos para acceder a los HEIC y a todo lo que esté en Archivos, Descargas o en una tarjeta SD.</string>
+    <string name="scrub_working">Limpiando</string>
+    <string name="scrub_progress">%1$d de %2$d</string>
+    <string name="scrub_save_pictures">Guardar en Imágenes</string>
+    <string name="scrub_save_files">Guardar en Archivos</string>
+    <string name="scrub_share">Compartir copias limpias</string>
+    <string name="scrub_start_over">Empezar de nuevo</string>
+    <string name="scrub_results_header">Por archivo</string>
+    <string name="scrub_summary_counts">%1$d limpiadas, %2$d ya limpias, %3$d no compatibles, %4$d con errores</string>
+    <string name="scrub_summary_bytes">%1$d bytes de metadatos eliminados</string>
+    <string name="scrub_summary_gps">%1$d contenían coordenadas GPS</string>
+    <string name="scrub_summary_orientation">%1$d conservaron su orientación vertical</string>
+    <string name="outcome_scrubbed">Limpiada</string>
+    <string name="outcome_clean">Limpia</string>
+    <string name="outcome_unsupported">Omitida</string>
+    <string name="outcome_failed">Con errores</string>
+
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_how_header">Cómo funciona</string>
+    <string name="settings_how_body">ScrubPony reescribe cada foto en tu dispositivo y elimina los bloques de metadatos que llevan la ubicación, la hora de captura, el modelo de cámara y las miniaturas. Los datos de la imagen se copian byte a byte, así que la foto que recibes se ve idéntica.</string>
+    <string name="settings_limits_body">No se sube nada y no hace falta conexión. Tus originales nunca se modifican: cada limpieza escribe una copia nueva y limpia.</string>
+
+    <string name="settings_options_header">Opciones de limpieza</string>
+    <string name="option_keep_orientation">Conservar orientación</string>
+    <string name="option_keep_orientation_sub">Mantiene la rotación vertical cuando los metadatos eliminados eran lo único que la registraba.</string>
+    <string name="option_strict">Estricto</string>
+    <string name="option_strict_sub">También elimina el perfil de color. Los colores pueden variar en algunas apps, pero queda aún menos rastro.</string>
+
+    <string name="settings_appearance_header">Apariencia</string>
+    <string name="settings_language">Idioma</string>
+
+    <string name="settings_more_header">Más de NorseHorse</string>
+    <string name="more_ponyfamily_subtitle">Toda la familia de herramientas pequeñas y privadas</string>
+    <string name="more_pgpony_subtitle">Cifrado PGP sin ordenador</string>
+    <string name="more_agepony_subtitle">Cifrado de archivos moderno con age</string>
+    <string name="more_quorumpony_subtitle">Reparto de secretos de Shamir, divide una clave</string>
+    <string name="more_carrierpony_subtitle">Oculta un archivo dentro de una imagen</string>
+    <string name="more_burnpony_subtitle">Notas y archivos que se autodestruyen</string>
+    <string name="more_vaultpony_subtitle">Una caja fuerte sin conexión para tus secretos</string>
+    <string name="more_passpony_subtitle">Un generador de contraseñas en el que confiar</string>
+    <string name="more_relaypony_subtitle">Envía un archivo directo a otro dispositivo</string>
+    <string name="settings_app_source">Código de la app de Android</string>
+    <string name="settings_core_source">Código del núcleo de limpieza</string>
+
+    <string name="settings_support_header">Soporte</string>
+    <string name="settings_website">Sitio web</string>
+    <string name="settings_guides">Guías</string>
+    <string name="settings_feedback">Enviar comentarios</string>
+    <string name="settings_rate">Valorar ScrubPony</string>
+    <string name="settings_privacy">Privacidad</string>
+    <string name="settings_terms">Términos</string>
+
+    <string name="settings_about_header">Acerca de</string>
+    <string name="settings_version">Versión</string>
+    <string name="settings_licenses">Licencias de código abierto</string>
+    <string name="settings_replay_tour">Volver a ver el tutorial</string>
+    <string name="settings_family_footer">Parte de la familia Pony de NorseHorse. Creada para funcionar sin conexión, en tu dispositivo.</string>
+
+    <string name="language_sheet_title">Idioma</string>
+
+    <string name="action_close">Cerrar</string>
+    <string name="licenses_intro">ScrubPony se apoya en los proyectos de código abierto de abajo. La app y su núcleo de limpieza también son de código abierto, enlazados en la pantalla de Ajustes.</string>
+    <string name="licenses_apache_note">El texto de la Licencia Apache 2.0 está disponible en apache.org/licenses/LICENSE-2.0.</string>
+
+    <string name="onboard_skip">Omitir</string>
+    <string name="onboard_next">Siguiente</string>
+    <string name="onboard_start">Empezar</string>
+    <string name="onboard_welcome_title">Conserva la foto. Deshazte de los metadatos.</string>
+    <string name="onboard_welcome_body">ScrubPony elimina los datos ocultos de tus fotos sin tocar la imagen en sí.</string>
+    <string name="onboard_local_title">Todo se queda en tu dispositivo</string>
+    <string name="onboard_local_body">La limpieza ocurre aquí, sin conexión. No se sube nada y tus archivos originales nunca se sobrescriben.</string>
+    <string name="onboard_formats_title">JPEG, PNG, WebP y HEIC</string>
+    <string name="onboard_formats_body">Elige una foto o un lote entero. ScrubPony maneja los formatos habituales, incluidos los HEIC que crea la cámara de tu teléfono.</string>
+    <string name="onboard_share_title">Limpia desde cualquier sitio</string>
+    <string name="onboard_share_body">Comparte una foto en ScrubPony desde cualquier app, o ábrela aquí y elige de la galería o de Archivos. Luego guarda o comparte la copia limpia.</string>
+</resources>

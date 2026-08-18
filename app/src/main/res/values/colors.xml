@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Window background shown before the first Compose frame. Matches
+         ScrubPonyTheme.background so launch has no light flash. -->
+    <color name="scrub_background">#FF0B0A0F</color>
+</resources>

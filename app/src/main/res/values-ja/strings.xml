@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_target_label">メタデータを消去</string>
+    <string name="share_chooser_title">クリーンな写真を共有</string>
+
+    <string name="nav_scrub">消去</string>
+    <string name="nav_settings">設定</string>
+
+    <string name="scrub_tagline">写真はそのまま。メタデータは消す。</string>
+    <string name="scrub_headline">隠れたデータを取り除く</string>
+    <string name="scrub_pick_hint">GPS、タイムスタンプ、端末情報、埋め込みサムネイルを取り除きます。ピクセルは元のまま変わりません。</string>
+    <string name="scrub_choose_photos">写真を選ぶ</string>
+    <string name="scrub_pick_from_files">ファイルから選ぶ</string>
+    <string name="scrub_files_note">写真ピッカーにはギャラリーが表示されます。ファイル、ダウンロード、SDカード内のHEICなどにアクセスするには「ファイルから選ぶ」を使ってください。</string>
+    <string name="scrub_working">消去中</string>
+    <string name="scrub_progress">%2$d 件中 %1$d 件</string>
+    <string name="scrub_save_pictures">写真に保存</string>
+    <string name="scrub_save_files">ファイルに保存</string>
+    <string name="scrub_share">クリーンなコピーを共有</string>
+    <string name="scrub_start_over">最初からやり直す</string>
+    <string name="scrub_results_header">ファイルごと</string>
+    <string name="scrub_summary_counts">消去 %1$d 件、既にクリーン %2$d 件、非対応 %3$d 件、失敗 %4$d 件</string>
+    <string name="scrub_summary_bytes">%1$d バイトのメタデータを削除</string>
+    <string name="scrub_summary_gps">%1$d 件にGPS座標が含まれていました</string>
+    <string name="scrub_summary_orientation">%1$d 件が正しい向きを保持しました</string>
+    <string name="outcome_scrubbed">消去済み</string>
+    <string name="outcome_clean">クリーン</string>
+    <string name="outcome_unsupported">スキップ</string>
+    <string name="outcome_failed">失敗</string>
+
+    <string name="settings_title">設定</string>
+    <string name="settings_how_header">仕組み</string>
+    <string name="settings_how_body">ScrubPonyは端末上で各写真を書き直し、位置情報、撮影時刻、カメラの機種、サムネイルを含むメタデータのブロックを取り除きます。画像データはそのままバイト単位でコピーされるため、見た目はまったく同じ写真になります。</string>
+    <string name="settings_limits_body">アップロードは一切なく、通信も不要です。元のファイルは決して変更されません。消去のたびに新しいクリーンなコピーを作成します。</string>
+
+    <string name="settings_options_header">消去オプション</string>
+    <string name="option_keep_orientation">向きを保持</string>
+    <string name="option_keep_orientation_sub">削除されるメタデータだけが向きを記録していた場合に、正しい向きを保ちます。</string>
+    <string name="option_strict">厳格</string>
+    <string name="option_strict_sub">カラープロファイルも削除します。一部のアプリで色が変わることがありますが、残る情報はさらに少なくなります。</string>
+
+    <string name="settings_appearance_header">外観</string>
+    <string name="settings_language">言語</string>
+
+    <string name="settings_more_header">NorseHorseの他のアプリ</string>
+    <string name="more_ponyfamily_subtitle">小さくてプライベートなツールのファミリー全体</string>
+    <string name="more_pgpony_subtitle">デスクトップ不要のPGP暗号化</string>
+    <string name="more_agepony_subtitle">ageによるモダンなファイル暗号化</string>
+    <string name="more_quorumpony_subtitle">シャミアの秘密分散、鍵を分割</string>
+    <string name="more_carrierpony_subtitle">画像の中にファイルを隠す</string>
+    <string name="more_burnpony_subtitle">自動で消えるメモとファイル</string>
+    <string name="more_vaultpony_subtitle">秘密を守るオフラインの金庫</string>
+    <string name="more_passpony_subtitle">信頼できるパスワード生成ツール</string>
+    <string name="more_relaypony_subtitle">別の端末へファイルを直接送信</string>
+    <string name="settings_app_source">Androidアプリのソース</string>
+    <string name="settings_core_source">消去コアのソース</string>
+
+    <string name="settings_support_header">サポート</string>
+    <string name="settings_website">ウェブサイト</string>
+    <string name="settings_guides">ガイド</string>
+    <string name="settings_feedback">フィードバックを送る</string>
+    <string name="settings_rate">ScrubPonyを評価</string>
+    <string name="settings_privacy">プライバシー</string>
+    <string name="settings_terms">利用規約</string>
+
+    <string name="settings_about_header">情報</string>
+    <string name="settings_version">バージョン</string>
+    <string name="settings_licenses">オープンソースライセンス</string>
+    <string name="settings_replay_tour">ツアーをもう一度見る</string>
+    <string name="settings_family_footer">NorseHorseのPonyファミリーの一つ。オフラインで、あなたの端末で動くように作られています。</string>
+
+    <string name="language_sheet_title">言語</string>
+
+    <string name="action_close">閉じる</string>
+    <string name="licenses_intro">ScrubPonyは以下のオープンソースプロジェクトの上に作られています。アプリと消去コアもオープンソースで、設定画面からリンクしています。</string>
+    <string name="licenses_apache_note">Apache License 2.0の全文は apache.org/licenses/LICENSE-2.0 で入手できます。</string>
+
+    <string name="onboard_skip">スキップ</string>
+    <string name="onboard_next">次へ</string>
+    <string name="onboard_start">はじめる</string>
+    <string name="onboard_welcome_title">写真はそのまま。メタデータは消す。</string>
+    <string name="onboard_welcome_body">ScrubPonyは写真から隠れたデータを取り除き、画像そのものには手を触れません。</string>
+    <string name="onboard_local_title">すべては端末の中だけ</string>
+    <string name="onboard_local_body">消去はここで、オフラインで行われます。アップロードは一切なく、元のファイルが上書きされることもありません。</string>
+    <string name="onboard_formats_title">JPEG、PNG、WebP、HEIC</string>
+    <string name="onboard_formats_body">1枚でもまとめてでも選べます。ScrubPonyは一般的な形式に対応し、スマホのカメラが作るHEICも扱えます。</string>
+    <string name="onboard_share_title">どこからでも消去</string>
+    <string name="onboard_share_body">どのアプリからでもScrubPonyに写真を共有できます。あるいはここで開いて、ギャラリーやファイルから選びます。あとはクリーンなコピーを保存または共有するだけです。</string>
+</resources>

@@ -1,0 +1,1 @@
+First release. Scrubs GPS and metadata from JPEG, PNG, WebP and HEIC, on your device. Localised in English, German, Spanish, French, Japanese and Brazilian Portuguese.

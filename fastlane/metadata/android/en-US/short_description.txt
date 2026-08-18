@@ -1,0 +1,1 @@
+Strip GPS and metadata from JPEG, PNG, WebP and HEIC photos, on your device.

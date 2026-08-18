@@ -1,18 +1,44 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.norsehorse.scrubpony
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoFixHigh
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import com.norsehorse.scrubpony.i18n.LanguageState
 import com.norsehorse.scrubpony.ui.ScrubScreen
+import com.norsehorse.scrubpony.ui.onboarding.OnboardingScreen
+import com.norsehorse.scrubpony.ui.settings.SettingsScreen
 import java.io.File
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     private val viewModel: ScrubViewModel by viewModels()
 
@@ -42,20 +68,24 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Reflect the stored per-app language into the observable used by the
+        // Settings picker, so the checkmark is right on first open.
+        LanguageState.initFromAppCompat(this)
+
+        val launchedFromShare = isShareIntent(intent)
         handleIncomingShare(intent)
 
         setContent {
             ScrubPonyTheme {
-                ScrubScreen(
+                AppRoot(
                     viewModel = viewModel,
+                    launchedFromShare = launchedFromShare,
                     onPickImages = {
                         pickImages.launch(
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                         )
                     },
-                    onPickFiles = {
-                        pickDocuments.launch(arrayOf("image/*"))
-                    },
+                    onPickFiles = { pickDocuments.launch(arrayOf("image/*")) },
                     onShareResults = { files -> shareResults(files) },
                     onSaveResults = { files -> saveResults(files) },
                     onSaveToFiles = { files ->
@@ -72,8 +102,11 @@ class MainActivity : ComponentActivity() {
         handleIncomingShare(intent)
     }
 
+    private fun isShareIntent(intent: Intent?): Boolean =
+        intent?.action == Intent.ACTION_SEND || intent?.action == Intent.ACTION_SEND_MULTIPLE
+
     /** Handles the app being opened via another app's share sheet
-     *  ("Scrub metadata" for one photo or several — see the SEND /
+     *  ("Scrub metadata" for one photo or several, see the SEND /
      *  SEND_MULTIPLE intent filters in AndroidManifest.xml). */
     private fun handleIncomingShare(intent: Intent?) {
         if (intent == null) return
@@ -117,4 +150,109 @@ class MainActivity : ComponentActivity() {
         if (files.isEmpty()) return
         SaveExporter.saveToTree(this, treeUri, files)
     }
+}
+
+private const val PREFS = "scrubpony_prefs"
+private const val KEY_ONBOARDING_SEEN = "onboarding_seen"
+
+private fun onboardingSeen(context: Context): Boolean =
+    context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(KEY_ONBOARDING_SEEN, false)
+
+private fun markOnboardingSeen(context: Context) {
+    context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        .edit().putBoolean(KEY_ONBOARDING_SEEN, true).apply()
+}
+
+private enum class Tab { SCRUB, SETTINGS }
+
+@Composable
+private fun AppRoot(
+    viewModel: ScrubViewModel,
+    launchedFromShare: Boolean,
+    onPickImages: () -> Unit,
+    onPickFiles: () -> Unit,
+    onShareResults: (List<File>) -> Unit,
+    onSaveResults: (List<File>) -> Unit,
+    onSaveToFiles: (List<File>) -> Unit,
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val alreadySeen = remember { onboardingSeen(context) }
+    var showOnboarding by rememberSaveable { mutableStateOf(!alreadySeen && !launchedFromShare) }
+
+    if (showOnboarding) {
+        OnboardingScreen(
+            onFinish = {
+                markOnboardingSeen(context)
+                showOnboarding = false
+            },
+        )
+        return
+    }
+
+    var tab by rememberSaveable { mutableStateOf(Tab.SCRUB) }
+
+    Scaffold(
+        containerColor = ScrubPonyTheme.background,
+        bottomBar = {
+            NavigationBar(containerColor = ScrubPonyTheme.panel) {
+                NavItem(
+                    selected = tab == Tab.SCRUB,
+                    onClick = { tab = Tab.SCRUB },
+                    icon = Icons.Filled.AutoFixHigh,
+                    label = stringResource(R.string.nav_scrub),
+                )
+                NavItem(
+                    selected = tab == Tab.SETTINGS,
+                    onClick = { tab = Tab.SETTINGS },
+                    icon = Icons.Filled.Settings,
+                    label = stringResource(R.string.nav_settings),
+                )
+            }
+        },
+    ) { inner ->
+        when (tab) {
+            Tab.SCRUB -> ScrubScreen(
+                viewModel = viewModel,
+                onPickImages = onPickImages,
+                onPickFiles = onPickFiles,
+                onShareResults = onShareResults,
+                onSaveResults = onSaveResults,
+                onSaveToFiles = onSaveToFiles,
+                modifier = Modifier.padding(inner),
+            )
+            Tab.SETTINGS -> SettingsScreen(
+                keepOrientation = viewModel.keepOrientation,
+                onKeepOrientationChange = { viewModel.keepOrientation = it },
+                strict = viewModel.strict,
+                onStrictChange = { viewModel.strict = it },
+                onReplayOnboarding = {
+                    tab = Tab.SCRUB
+                    showOnboarding = true
+                },
+                modifier = Modifier.padding(inner),
+            )
+        }
+    }
+}
+
+@Composable
+private fun androidx.compose.foundation.layout.RowScope.NavItem(
+    selected: Boolean,
+    onClick: () -> Unit,
+    icon: ImageVector,
+    label: String,
+) {
+    NavigationBarItem(
+        selected = selected,
+        onClick = onClick,
+        icon = { Icon(icon, contentDescription = label) },
+        label = { Text(label) },
+        colors = NavigationBarItemDefaults.colors(
+            selectedIconColor = ScrubPonyTheme.onAccent,
+            selectedTextColor = ScrubPonyTheme.ink,
+            indicatorColor = ScrubPonyTheme.accent,
+            unselectedIconColor = ScrubPonyTheme.dim,
+            unselectedTextColor = ScrubPonyTheme.dim,
+        ),
+    )
 }

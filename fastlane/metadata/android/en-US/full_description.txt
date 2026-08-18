@@ -1,0 +1,9 @@
+ScrubPony removes the hidden metadata from your photos while leaving the picture itself untouched.
+
+Phones write a lot into every photo you take: GPS coordinates, the exact date and time, the camera and phone model, and small embedded thumbnails. ScrubPony strips those out and writes a fresh, clean copy. The image data is copied through byte for byte, so the photo looks exactly the same.
+
+It works on JPEG, PNG, WebP and HEIC, including the HEICs most phone cameras save by default. Pick one photo or a whole batch.
+
+Everything happens on your device. Nothing is uploaded, no network is used, and the app asks for no permissions. Your original files are never changed. Every scrub produces a new copy that you can save to your gallery, save to any folder, or share straight to another app. You can also share photos into ScrubPony from any other app's share sheet.
+
+The metadata handling is the same C core as the desktop ScrubPony, compiled into the app. It is open source under the Apache License 2.0.

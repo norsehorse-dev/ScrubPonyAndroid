@@ -22,3 +22,7 @@ app/debug/
 *.keystore
 *.jks
 keystore.properties
+
+# Local scratch, never committed
+/_to_delete/
+*.HEIC
