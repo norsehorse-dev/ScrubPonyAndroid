@@ -98,4 +98,21 @@
     <string name="onboard_formats_body">Pick one photo or a whole batch. ScrubPony handles the common formats, including the HEICs your phone camera makes.</string>
     <string name="onboard_share_title">Scrub from anywhere</string>
     <string name="onboard_share_body">Share a photo into ScrubPony from any app, or open it here and pick from your gallery or Files. Then save or share the clean copy.</string>
+
+    <!-- Bulk folder clean -->
+    <string name="scrub_clean_folder">Clean a folder</string>
+    <string name="bulk_title">Clean a folder</string>
+    <string name="bulk_scanning">Scanning %1$d of %2$d</string>
+    <string name="bulk_cleaning">Cleaning %1$d of %2$d</string>
+    <string name="bulk_review_summary">%1$d of %2$d images carry metadata</string>
+    <string name="bulk_review_breakdown">%1$d already clean, %2$d skipped</string>
+    <string name="bulk_none">Nothing to clean here. These images carry no metadata to remove.</string>
+    <string name="bulk_replace">Replace in place</string>
+    <string name="bulk_replace_note">Rewrites the originals. Pixels stay identical, metadata is removed.</string>
+    <string name="bulk_save_copies">Save cleaned copies</string>
+    <string name="bulk_save_copies_note">Writes copies to a ScrubPony cleaned subfolder. Originals untouched.</string>
+    <string name="bulk_files_header">In this folder</string>
+    <string name="bulk_done_inplace">Cleaned %1$d files in place</string>
+    <string name="bulk_done_subfolder">Saved %1$d cleaned copies</string>
+    <string name="bulk_done_failed">%1$d could not be written</string>
 </resources>

@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.norsehorse.scrubpony.i18n.LanguageState
 import com.norsehorse.scrubpony.ui.ScrubScreen
+import com.norsehorse.scrubpony.ui.bulk.BulkCleanOverlay
 import com.norsehorse.scrubpony.ui.onboarding.OnboardingScreen
 import com.norsehorse.scrubpony.ui.settings.SettingsScreen
 import java.io.File
@@ -41,6 +42,8 @@ import java.io.File
 class MainActivity : AppCompatActivity() {
 
     private val viewModel: ScrubViewModel by viewModels()
+
+    private val bulkVm: BulkCleanViewModel by viewModels()
 
     private val pickImages = registerForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(50),
@@ -64,6 +67,13 @@ class MainActivity : AppCompatActivity() {
     private val pickSaveFolder = registerForActivityResult(
         ActivityResultContracts.OpenDocumentTree(),
     ) { treeUri -> if (treeUri != null) saveToFiles(treeUri, pendingSaveToFiles) }
+
+    // Bulk clean: pick a folder, scan it for images that still carry metadata,
+    // then clean them in one pass. OpenDocumentTree grants scoped read/write to
+    // just that tree, so no broad storage permission is needed.
+    private val pickCleanFolder = registerForActivityResult(
+        ActivityResultContracts.OpenDocumentTree(),
+    ) { treeUri -> if (treeUri != null) bulkVm.scan(treeUri, viewModel.strict, viewModel.keepOrientation) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,7 +102,9 @@ class MainActivity : AppCompatActivity() {
                         pendingSaveToFiles = files
                         pickSaveFolder.launch(null)
                     },
+                    onCleanFolder = { pickCleanFolder.launch(null) },
                 )
+                BulkCleanOverlay(bulkVm)
             }
         }
     }
@@ -174,6 +186,7 @@ private fun AppRoot(
     onShareResults: (List<File>) -> Unit,
     onSaveResults: (List<File>) -> Unit,
     onSaveToFiles: (List<File>) -> Unit,
+    onCleanFolder: () -> Unit,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val alreadySeen = remember { onboardingSeen(context) }
@@ -218,6 +231,7 @@ private fun AppRoot(
                 onShareResults = onShareResults,
                 onSaveResults = onSaveResults,
                 onSaveToFiles = onSaveToFiles,
+                onCleanFolder = onCleanFolder,
                 modifier = Modifier.padding(inner),
             )
             Tab.SETTINGS -> SettingsScreen(

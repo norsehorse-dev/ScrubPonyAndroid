@@ -86,4 +86,21 @@
     <string name="onboard_formats_body">Choisissez une photo ou tout un lot. ScrubPony gère les formats courants, y compris les HEIC produits par l\'appareil photo de votre téléphone.</string>
     <string name="onboard_share_title">Nettoyez depuis partout</string>
     <string name="onboard_share_body">Partagez une photo vers ScrubPony depuis n\'importe quelle appli, ou ouvrez-la ici et choisissez dans la galerie ou Fichiers. Puis enregistrez ou partagez la copie propre.</string>
+
+    <!-- Bulk folder clean -->
+    <string name="scrub_clean_folder">Nettoyer un dossier</string>
+    <string name="bulk_title">Nettoyer un dossier</string>
+    <string name="bulk_scanning">Analyse de %1$d sur %2$d</string>
+    <string name="bulk_cleaning">Nettoyage de %1$d sur %2$d</string>
+    <string name="bulk_review_summary">%1$d images sur %2$d portent des métadonnées</string>
+    <string name="bulk_review_breakdown">%1$d déjà propres, %2$d ignorées</string>
+    <string name="bulk_none">Rien à nettoyer ici. Ces images ne portent aucune métadonnée à retirer.</string>
+    <string name="bulk_replace">Remplacer sur place</string>
+    <string name="bulk_replace_note">Réécrit les originaux. Les pixels ne changent pas, les métadonnées sont retirées.</string>
+    <string name="bulk_save_copies">Enregistrer des copies propres</string>
+    <string name="bulk_save_copies_note">Écrit des copies dans un sous-dossier ScrubPony cleaned. Les originaux ne sont pas touchés.</string>
+    <string name="bulk_files_header">Dans ce dossier</string>
+    <string name="bulk_done_inplace">%1$d fichiers nettoyés sur place</string>
+    <string name="bulk_done_subfolder">%1$d copies propres enregistrées</string>
+    <string name="bulk_done_failed">%1$d n\'ont pas pu être écrits</string>
 </resources>

@@ -56,6 +56,7 @@ fun ScrubScreen(
     onShareResults: (List<File>) -> Unit,
     onSaveResults: (List<File>) -> Unit,
     onSaveToFiles: (List<File>) -> Unit,
+    onCleanFolder: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -66,7 +67,7 @@ fun ScrubScreen(
             .background(ScrubPonyTheme.background),
     ) {
         when (val s = state) {
-            is UiState.Idle -> IdleContent(onPickImages, onPickFiles)
+            is UiState.Idle -> IdleContent(onPickImages, onPickFiles, onCleanFolder)
             is UiState.Processing -> ProcessingContent(s)
             is UiState.Done -> DoneContent(
                 summary = s.summary,
@@ -96,7 +97,7 @@ private fun Wordmark() {
 }
 
 @Composable
-private fun IdleContent(onPickImages: () -> Unit, onPickFiles: () -> Unit) {
+private fun IdleContent(onPickImages: () -> Unit, onPickFiles: () -> Unit, onCleanFolder: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -149,6 +150,11 @@ private fun IdleContent(onPickImages: () -> Unit, onPickFiles: () -> Unit) {
         SecondaryButton(
             text = stringResource(R.string.scrub_pick_from_files),
             onClick = onPickFiles,
+        )
+        Spacer(Modifier.height(10.dp))
+        SecondaryButton(
+            text = stringResource(R.string.scrub_clean_folder),
+            onClick = onCleanFolder,
         )
         Spacer(Modifier.height(14.dp))
         Text(

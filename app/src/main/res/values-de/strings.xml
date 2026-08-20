@@ -86,4 +86,21 @@
     <string name="onboard_formats_body">Wähle ein Foto oder einen ganzen Stapel. ScrubPony verarbeitet die gängigen Formate, auch die HEICs deiner Handykamera.</string>
     <string name="onboard_share_title">Von überall bereinigen</string>
     <string name="onboard_share_body">Teile ein Foto aus jeder App in ScrubPony, oder öffne es hier und wähle aus Galerie oder Dateien. Dann speichere oder teile die saubere Kopie.</string>
+
+    <!-- Bulk folder clean -->
+    <string name="scrub_clean_folder">Ordner bereinigen</string>
+    <string name="bulk_title">Ordner bereinigen</string>
+    <string name="bulk_scanning">Prüfe %1$d von %2$d</string>
+    <string name="bulk_cleaning">Bereinige %1$d von %2$d</string>
+    <string name="bulk_review_summary">%1$d von %2$d Bildern enthalten Metadaten</string>
+    <string name="bulk_review_breakdown">%1$d bereits sauber, %2$d übersprungen</string>
+    <string name="bulk_none">Hier gibt es nichts zu bereinigen. Diese Bilder enthalten keine Metadaten.</string>
+    <string name="bulk_replace">An Ort und Stelle ersetzen</string>
+    <string name="bulk_replace_note">Überschreibt die Originale. Pixel bleiben gleich, Metadaten werden entfernt.</string>
+    <string name="bulk_save_copies">Bereinigte Kopien speichern</string>
+    <string name="bulk_save_copies_note">Schreibt Kopien in einen Unterordner ScrubPony cleaned. Originale bleiben unberührt.</string>
+    <string name="bulk_files_header">In diesem Ordner</string>
+    <string name="bulk_done_inplace">%1$d Dateien an Ort und Stelle bereinigt</string>
+    <string name="bulk_done_subfolder">%1$d bereinigte Kopien gespeichert</string>
+    <string name="bulk_done_failed">%1$d konnten nicht geschrieben werden</string>
 </resources>

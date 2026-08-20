@@ -86,4 +86,21 @@
     <string name="onboard_formats_body">Escolha uma foto ou um lote inteiro. O ScrubPony lida com os formatos comuns, incluindo os HEIC que a câmera do seu celular cria.</string>
     <string name="onboard_share_title">Limpe de qualquer lugar</string>
     <string name="onboard_share_body">Compartilhe uma foto no ScrubPony a partir de qualquer app, ou abra aqui e escolha da galeria ou de Arquivos. Depois salve ou compartilhe a cópia limpa.</string>
+
+    <!-- Bulk folder clean -->
+    <string name="scrub_clean_folder">Limpar uma pasta</string>
+    <string name="bulk_title">Limpar uma pasta</string>
+    <string name="bulk_scanning">Analisando %1$d de %2$d</string>
+    <string name="bulk_cleaning">Limpando %1$d de %2$d</string>
+    <string name="bulk_review_summary">%1$d de %2$d imagens têm metadados</string>
+    <string name="bulk_review_breakdown">%1$d já limpas, %2$d ignoradas</string>
+    <string name="bulk_none">Nada para limpar aqui. Estas imagens não têm metadados para remover.</string>
+    <string name="bulk_replace">Substituir no lugar</string>
+    <string name="bulk_replace_note">Reescreve os originais. Os pixels não mudam, os metadados são removidos.</string>
+    <string name="bulk_save_copies">Salvar cópias limpas</string>
+    <string name="bulk_save_copies_note">Escreve cópias em uma subpasta ScrubPony cleaned. Os originais não são tocados.</string>
+    <string name="bulk_files_header">Nesta pasta</string>
+    <string name="bulk_done_inplace">%1$d arquivos limpos no lugar</string>
+    <string name="bulk_done_subfolder">%1$d cópias limpas salvas</string>
+    <string name="bulk_done_failed">%1$d não puderam ser escritos</string>
 </resources>
