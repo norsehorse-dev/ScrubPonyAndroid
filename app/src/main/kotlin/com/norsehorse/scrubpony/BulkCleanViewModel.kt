@@ -14,8 +14,9 @@ import java.io.File
 /**
  * Drives the bulk folder clean: scan a picked folder, review what carries
  * metadata, then clean either in place or into a copies subfolder. Reuses the
- * same ScrubEngine the single-file path uses, so the scan is a real scrub to
- * the cache (that is also what produces the clean copy the clean step writes).
+ * same ScrubEngine the single-file path uses, so the scan is a real scrub to the
+ * cache (that is also what produces the clean copy the clean step writes) unless
+ * the scan cache already knows the file is clean, in which case it is skipped.
  */
 sealed interface BulkState {
     data object Idle : BulkState
@@ -30,6 +31,7 @@ data class BulkItem(
     val outcome: FileOutcome,
     val cleaned: File?,        // cached clean copy, present when outcome == SCRUBBED
     val bytesRemoved: Long,
+    val metadata: List<MetaField> = emptyList(),
 )
 
 class BulkCleanViewModel(application: Application) : AndroidViewModel(application) {
@@ -51,19 +53,37 @@ class BulkCleanViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             engine.clearWorkingFiles()
             _state.value = BulkState.Scanning(0, 0)
-            val images = withContext(Dispatchers.IO) {
-                BulkFiles.listImages(getApplication(), treeUri)
-            }
+            val app = getApplication<Application>()
+            val images = withContext(Dispatchers.IO) { BulkFiles.listImages(app, treeUri) }
             _state.value = BulkState.Scanning(0, images.size)
+
+            val cache = withContext(Dispatchers.IO) { ScanCache.loadClean(app) }
             val items = ArrayList<BulkItem>(images.size)
             for ((i, img) in images.withIndex()) {
-                val r = withContext(Dispatchers.IO) {
-                    engine.scrubOne(img.file.uri, strict, keepOrientation)
+                val key = BulkFiles.cacheKey(img)
+                val item = if (key in cache) {
+                    // Known clean and unchanged: skip the read entirely.
+                    BulkItem(img, FileOutcome.ALREADY_CLEAN, null, 0)
+                } else {
+                    val r = withContext(Dispatchers.IO) { engine.scrubOne(img.file.uri, strict, keepOrientation) }
+                    if (r.outcome == FileOutcome.ALREADY_CLEAN) cache.add(key)
+                    BulkItem(img, r.outcome, r.outputFile, r.bytesRemoved, r.metadata)
                 }
-                items.add(BulkItem(img, r.outcome, r.outputFile, r.bytesRemoved))
+                items.add(item)
                 _state.value = BulkState.Scanning(i + 1, images.size)
             }
-            _state.value = BulkState.Reviewed(items)
+            withContext(Dispatchers.IO) { ScanCache.saveClean(app, cache) }
+
+            // Files that carry metadata first, then already clean, then skipped.
+            val sorted = items.sortedBy {
+                when (it.outcome) {
+                    FileOutcome.SCRUBBED -> 0
+                    FileOutcome.ALREADY_CLEAN -> 1
+                    FileOutcome.UNSUPPORTED -> 2
+                    FileOutcome.FAILED -> 3
+                }
+            }
+            _state.value = BulkState.Reviewed(sorted)
         }
     }
 
@@ -77,9 +97,10 @@ class BulkCleanViewModel(application: Application) : AndroidViewModel(applicatio
         val dirty = reviewed.items.filter { it.outcome == FileOutcome.SCRUBBED && it.cleaned != null }
         if (dirty.isEmpty()) return
         viewModelScope.launch {
+            val app = getApplication<Application>()
             _state.value = BulkState.Cleaning(0, dirty.size)
             val folder = if (toSubfolder && tree != null) {
-                withContext(Dispatchers.IO) { BulkFiles.cleanedFolder(getApplication(), tree) }
+                withContext(Dispatchers.IO) { BulkFiles.cleanedFolder(app, tree) }
             } else null
             var ok = 0
             var failed = 0
@@ -87,11 +108,9 @@ class BulkCleanViewModel(application: Application) : AndroidViewModel(applicatio
                 val src = item.cleaned ?: continue
                 val done = withContext(Dispatchers.IO) {
                     if (toSubfolder) {
-                        folder != null && BulkFiles.copyInto(
-                            getApplication(), folder, item.image.name, item.image.mime, src,
-                        )
+                        folder != null && BulkFiles.copyInto(app, folder, item.image.name, item.image.mime, src)
                     } else {
-                        BulkFiles.replaceInPlace(getApplication(), item.image, src)
+                        BulkFiles.replaceInPlace(app, item.image, src)
                     }
                 }
                 if (done) ok++ else failed++

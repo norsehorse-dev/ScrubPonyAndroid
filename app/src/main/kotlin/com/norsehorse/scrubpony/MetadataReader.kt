@@ -48,3 +48,15 @@ object MetadataReader {
 
     private fun String?.clean(): String? = this?.trim()?.takeIf { it.isNotEmpty() }
 }
+
+fun metaLabelRes(key: MetaKey): Int = when (key) {
+    MetaKey.LOCATION -> R.string.meta_location
+    MetaKey.DATE -> R.string.meta_date
+    MetaKey.CAMERA -> R.string.meta_camera
+    MetaKey.LENS -> R.string.meta_lens
+    MetaKey.SOFTWARE -> R.string.meta_software
+    MetaKey.ARTIST -> R.string.meta_artist
+    MetaKey.COPYRIGHT -> R.string.meta_copyright
+    MetaKey.DESCRIPTION -> R.string.meta_description
+    MetaKey.COMMENT -> R.string.meta_comment
+}

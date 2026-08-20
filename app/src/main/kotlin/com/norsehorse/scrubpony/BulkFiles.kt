@@ -8,13 +8,17 @@ import java.io.File
 
 /**
  * One image found under a picked folder tree. The parent is kept so an in-place
- * replace can create its temporary file in the same directory before swapping.
+ * replace can create its temporary file in the same directory before swapping;
+ * size and modified time are captured for the scan cache key so a re-scan can
+ * skip files that have not changed.
  */
 data class TreeImage(
     val parent: DocumentFile,
     val file: DocumentFile,
     val name: String,
     val mime: String,
+    val size: Long,
+    val modified: Long,
 )
 
 /**
@@ -63,12 +67,20 @@ object BulkFiles {
                 } else {
                     val name = child.name ?: continue
                     if (looksLikeImage(name, child.type)) {
-                        out.add(TreeImage(dir, child, name, mimeFor(name)))
+                        out.add(TreeImage(dir, child, name, mimeFor(name), child.length(), child.lastModified()))
                     }
                 }
             }
         }
         return out
+    }
+
+    /** Stable-ish key for the scan cache: the document id plus size and modified
+     *  time, so an unchanged file matches on a later scan without being read. */
+    fun cacheKey(img: TreeImage): String {
+        val id = runCatching { DocumentsContract.getDocumentId(img.file.uri) }.getOrNull()
+            ?: img.file.uri.toString()
+        return "$id|${img.size}|${img.modified}"
     }
 
     /**

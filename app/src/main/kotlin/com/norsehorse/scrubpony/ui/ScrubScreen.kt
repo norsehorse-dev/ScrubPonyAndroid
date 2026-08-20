@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.norsehorse.scrubpony.BatchSummary
 import com.norsehorse.scrubpony.FileOutcome
 import com.norsehorse.scrubpony.R
-import com.norsehorse.scrubpony.MetaKey
+import com.norsehorse.scrubpony.metaLabelRes
 import com.norsehorse.scrubpony.ScrubItemResult
 import com.norsehorse.scrubpony.ScrubPonySerifItalic
 import com.norsehorse.scrubpony.ScrubPonyTheme
@@ -349,7 +349,7 @@ private fun ResultRow(result: ScrubItemResult) {
                         verticalAlignment = Alignment.Top,
                     ) {
                         Text(
-                            stringResource(metaLabel(field.key)),
+                            stringResource(metaLabelRes(field.key)),
                             style = MaterialTheme.typography.bodySmall,
                             color = ScrubPonyTheme.dim,
                             modifier = Modifier.width(104.dp),
@@ -365,18 +365,6 @@ private fun ResultRow(result: ScrubItemResult) {
             }
         }
     }
-}
-
-private fun metaLabel(key: MetaKey): Int = when (key) {
-    MetaKey.LOCATION -> R.string.meta_location
-    MetaKey.DATE -> R.string.meta_date
-    MetaKey.CAMERA -> R.string.meta_camera
-    MetaKey.LENS -> R.string.meta_lens
-    MetaKey.SOFTWARE -> R.string.meta_software
-    MetaKey.ARTIST -> R.string.meta_artist
-    MetaKey.COPYRIGHT -> R.string.meta_copyright
-    MetaKey.DESCRIPTION -> R.string.meta_description
-    MetaKey.COMMENT -> R.string.meta_comment
 }
 
 @Composable
