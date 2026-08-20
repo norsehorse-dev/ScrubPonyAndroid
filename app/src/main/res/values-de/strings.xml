@@ -103,4 +103,17 @@
     <string name="bulk_done_inplace">%1$d Dateien an Ort und Stelle bereinigt</string>
     <string name="bulk_done_subfolder">%1$d bereinigte Kopien gespeichert</string>
     <string name="bulk_done_failed">%1$d konnten nicht geschrieben werden</string>
+
+    <!-- Removed-metadata detail labels -->
+    <string name="meta_show">Was entfernt wurde</string>
+    <string name="meta_hide">Details ausblenden</string>
+    <string name="meta_location">Standort</string>
+    <string name="meta_date">Aufnahmedatum</string>
+    <string name="meta_camera">Kamera</string>
+    <string name="meta_lens">Objektiv</string>
+    <string name="meta_software">Software</string>
+    <string name="meta_artist">Urheber</string>
+    <string name="meta_copyright">Copyright</string>
+    <string name="meta_description">Beschreibung</string>
+    <string name="meta_comment">Kommentar</string>
 </resources>

@@ -115,4 +115,17 @@
     <string name="bulk_done_inplace">Cleaned %1$d files in place</string>
     <string name="bulk_done_subfolder">Saved %1$d cleaned copies</string>
     <string name="bulk_done_failed">%1$d could not be written</string>
+
+    <!-- Removed-metadata detail labels -->
+    <string name="meta_show">What was removed</string>
+    <string name="meta_hide">Hide details</string>
+    <string name="meta_location">Location</string>
+    <string name="meta_date">Date taken</string>
+    <string name="meta_camera">Camera</string>
+    <string name="meta_lens">Lens</string>
+    <string name="meta_software">Software</string>
+    <string name="meta_artist">Artist</string>
+    <string name="meta_copyright">Copyright</string>
+    <string name="meta_description">Description</string>
+    <string name="meta_comment">Comment</string>
 </resources>

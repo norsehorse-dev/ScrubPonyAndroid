@@ -17,6 +17,7 @@ data class ScrubItemResult(
     val bytesRemoved: Long,
     val hasGps: Boolean,
     val orientationKept: Boolean,
+    val metadata: List<MetaField> = emptyList(),
 )
 
 data class BatchSummary(val results: List<ScrubItemResult>) {
@@ -70,6 +71,10 @@ class ScrubEngine(private val context: Context) {
         if (!staged) {
             return ScrubItemResult(displayName, FileOutcome.FAILED, "could not open input", null, 0, false, false)
         }
+
+        // Read the original's metadata before the core strips it, so the result
+        // can show what was removed. Read-only and best-effort.
+        val meta = MetadataReader.read(stagedInput)
 
         val baseName = displayName.substringBeforeLast('.', displayName).ifBlank { "photo" }
         val suffix = UUID.randomUUID().toString().take(8)
@@ -138,7 +143,7 @@ class ScrubEngine(private val context: Context) {
             "removed ${stats.dropped} $unit${if (stats.dropped == 1L) "" else "s"}, $removed bytes"
         }
 
-        return ScrubItemResult(displayName, outcome, message, finalFile, removed, stats.hasGps, stats.orientationKept)
+        return ScrubItemResult(displayName, outcome, message, finalFile, removed, stats.hasGps, stats.orientationKept, metadata = meta)
     }
 
     private fun queryDisplayName(resolver: ContentResolver, uri: Uri): String? {

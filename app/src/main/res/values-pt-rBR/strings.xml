@@ -103,4 +103,17 @@
     <string name="bulk_done_inplace">%1$d arquivos limpos no lugar</string>
     <string name="bulk_done_subfolder">%1$d cópias limpas salvas</string>
     <string name="bulk_done_failed">%1$d não puderam ser escritos</string>
+
+    <!-- Removed-metadata detail labels -->
+    <string name="meta_show">O que foi removido</string>
+    <string name="meta_hide">Ocultar detalhes</string>
+    <string name="meta_location">Localização</string>
+    <string name="meta_date">Data da captura</string>
+    <string name="meta_camera">Câmera</string>
+    <string name="meta_lens">Lente</string>
+    <string name="meta_software">Software</string>
+    <string name="meta_artist">Autor</string>
+    <string name="meta_copyright">Copyright</string>
+    <string name="meta_description">Descrição</string>
+    <string name="meta_comment">Comentário</string>
 </resources>

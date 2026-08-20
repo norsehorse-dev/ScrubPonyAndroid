@@ -103,4 +103,17 @@
     <string name="bulk_done_inplace">%1$d 件をその場で消去しました</string>
     <string name="bulk_done_subfolder">%1$d 件のクリーンなコピーを保存しました</string>
     <string name="bulk_done_failed">%1$d 件は書き込めませんでした</string>
+
+    <!-- Removed-metadata detail labels -->
+    <string name="meta_show">削除された情報</string>
+    <string name="meta_hide">詳細を隠す</string>
+    <string name="meta_location">位置情報</string>
+    <string name="meta_date">撮影日時</string>
+    <string name="meta_camera">カメラ</string>
+    <string name="meta_lens">レンズ</string>
+    <string name="meta_software">ソフトウェア</string>
+    <string name="meta_artist">作成者</string>
+    <string name="meta_copyright">著作権</string>
+    <string name="meta_description">説明</string>
+    <string name="meta_comment">コメント</string>
 </resources>

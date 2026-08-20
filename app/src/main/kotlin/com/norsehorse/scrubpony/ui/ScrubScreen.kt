@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,6 +26,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -34,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.norsehorse.scrubpony.BatchSummary
 import com.norsehorse.scrubpony.FileOutcome
 import com.norsehorse.scrubpony.R
+import com.norsehorse.scrubpony.MetaKey
 import com.norsehorse.scrubpony.ScrubItemResult
 import com.norsehorse.scrubpony.ScrubPonySerifItalic
 import com.norsehorse.scrubpony.ScrubPonyTheme
@@ -307,24 +312,71 @@ private fun ResultRow(result: ScrubItemResult) {
         FileOutcome.UNSUPPORTED -> stringResource(R.string.outcome_unsupported) to ScrubPonyTheme.dim
         FileOutcome.FAILED -> stringResource(R.string.outcome_failed) to ScrubPonyTheme.danger
     }
-    Row(
+    val hasDetails = result.metadata.isNotEmpty()
+    var expanded by remember { mutableStateOf(false) }
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(ScrubPonyTheme.panel, RoundedCornerShape(12.dp))
+            .then(if (hasDetails) Modifier.clickable { expanded = !expanded } else Modifier)
             .padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.weight(1f)) {
-            Text(result.displayName, color = ScrubPonyTheme.ink, maxLines = 1)
-            Text(
-                result.message,
-                style = MaterialTheme.typography.bodySmall,
-                color = ScrubPonyTheme.dim,
-            )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(result.displayName, color = ScrubPonyTheme.ink, maxLines = 1)
+                Text(
+                    result.message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = ScrubPonyTheme.dim,
+                )
+            }
+            Spacer(Modifier.size(10.dp))
+            Text(label, color = tint, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Medium)
         }
-        Spacer(Modifier.size(10.dp))
-        Text(label, color = tint, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Medium)
+        if (hasDetails) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(if (expanded) R.string.meta_hide else R.string.meta_show),
+                style = MaterialTheme.typography.labelSmall,
+                color = ScrubPonyTheme.accent,
+                fontWeight = FontWeight.Medium,
+            )
+            if (expanded) {
+                Spacer(Modifier.height(8.dp))
+                result.metadata.forEach { field ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
+                        verticalAlignment = Alignment.Top,
+                    ) {
+                        Text(
+                            stringResource(metaLabel(field.key)),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = ScrubPonyTheme.dim,
+                            modifier = Modifier.width(104.dp),
+                        )
+                        Text(
+                            field.value,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = ScrubPonyTheme.ink,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
+            }
+        }
     }
+}
+
+private fun metaLabel(key: MetaKey): Int = when (key) {
+    MetaKey.LOCATION -> R.string.meta_location
+    MetaKey.DATE -> R.string.meta_date
+    MetaKey.CAMERA -> R.string.meta_camera
+    MetaKey.LENS -> R.string.meta_lens
+    MetaKey.SOFTWARE -> R.string.meta_software
+    MetaKey.ARTIST -> R.string.meta_artist
+    MetaKey.COPYRIGHT -> R.string.meta_copyright
+    MetaKey.DESCRIPTION -> R.string.meta_description
+    MetaKey.COMMENT -> R.string.meta_comment
 }
 
 @Composable
