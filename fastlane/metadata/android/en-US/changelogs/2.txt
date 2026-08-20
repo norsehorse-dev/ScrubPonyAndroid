@@ -1,0 +1,1 @@
+Bulk folder clean: point ScrubPony at a folder, and it finds the images that still carry metadata and cleans them in one pass, in place or as copies. Still no broad file permission.
