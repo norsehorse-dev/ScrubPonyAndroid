@@ -1,0 +1,1 @@
+See what was removed: each cleaned file now shows the metadata it carried (location, date, camera and more) that ScrubPony stripped out.
