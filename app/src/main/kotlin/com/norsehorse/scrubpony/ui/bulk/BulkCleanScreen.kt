@@ -233,7 +233,7 @@ private fun FileRow(item: BulkItem) {
                         verticalAlignment = Alignment.Top,
                     ) {
                         Text(
-                            stringResource(metaLabelRes(field.key)),
+                            field.rawLabel ?: stringResource(metaLabelRes(field.key)),
                             style = MaterialTheme.typography.bodySmall,
                             color = ScrubPonyTheme.dim,
                             modifier = Modifier.width(104.dp),

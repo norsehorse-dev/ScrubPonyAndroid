@@ -116,4 +116,5 @@
     <string name="meta_copyright">著作権</string>
     <string name="meta_description">説明</string>
     <string name="meta_comment">コメント</string>
+    <string name="meta_other">その他</string>
 </resources>

@@ -116,4 +116,5 @@
     <string name="meta_copyright">Copyright</string>
     <string name="meta_description">Descrição</string>
     <string name="meta_comment">Comentário</string>
+    <string name="meta_other">Outro</string>
 </resources>
