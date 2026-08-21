@@ -21,7 +21,7 @@ import java.io.File
 sealed interface BulkState {
     data object Idle : BulkState
     data class Scanning(val done: Int, val total: Int) : BulkState
-    data class Reviewed(val items: List<BulkItem>) : BulkState
+    data class Reviewed(val items: List<BulkItem>, val cachedSkips: Int = 0) : BulkState
     data class Cleaning(val done: Int, val total: Int) : BulkState
     data class Done(val cleaned: Int, val failed: Int, val toSubfolder: Boolean) : BulkState
 }
@@ -59,9 +59,11 @@ class BulkCleanViewModel(application: Application) : AndroidViewModel(applicatio
 
             val cache = withContext(Dispatchers.IO) { ScanCache.loadClean(app) }
             val items = ArrayList<BulkItem>(images.size)
+            var cachedSkips = 0
             for ((i, img) in images.withIndex()) {
                 val key = BulkFiles.cacheKey(img)
                 val item = if (key in cache) {
+                    cachedSkips++
                     // Known clean and unchanged: skip the read entirely.
                     BulkItem(img, FileOutcome.ALREADY_CLEAN, null, 0)
                 } else {
@@ -83,7 +85,7 @@ class BulkCleanViewModel(application: Application) : AndroidViewModel(applicatio
                     FileOutcome.FAILED -> 3
                 }
             }
-            _state.value = BulkState.Reviewed(sorted)
+            _state.value = BulkState.Reviewed(sorted, cachedSkips)
         }
     }
 

@@ -74,7 +74,7 @@ fun BulkCleanOverlay(vm: BulkCleanViewModel) {
                     line = stringResource(R.string.bulk_cleaning, s.done, s.total),
                     fraction = frac(s.done, s.total),
                 )
-                is BulkState.Reviewed -> Review(s.items, vm)
+                is BulkState.Reviewed -> Review(s.items, s.cachedSkips, vm)
                 is BulkState.Done -> DoneView(s.cleaned, s.failed, s.toSubfolder) { vm.close() }
                 BulkState.Idle -> Unit
             }
@@ -105,7 +105,7 @@ private fun Progress(title: String, line: String, fraction: Float) {
 }
 
 @Composable
-private fun Review(items: List<BulkItem>, vm: BulkCleanViewModel) {
+private fun Review(items: List<BulkItem>, cachedSkips: Int, vm: BulkCleanViewModel) {
     val dirty = items.count { it.outcome == FileOutcome.SCRUBBED }
     val clean = items.count { it.outcome == FileOutcome.ALREADY_CLEAN }
     val skipped = items.count { it.outcome == FileOutcome.UNSUPPORTED || it.outcome == FileOutcome.FAILED }
@@ -133,6 +133,13 @@ private fun Review(items: List<BulkItem>, vm: BulkCleanViewModel) {
                 style = MaterialTheme.typography.bodySmall,
                 color = ScrubPonyTheme.dim,
             )
+            if (cachedSkips > 0) {
+                Text(
+                    stringResource(R.string.bulk_cached, cachedSkips),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = ScrubPonyTheme.dim,
+                )
+            }
         }
 
         if (dirty == 0) {

@@ -117,4 +117,5 @@
     <string name="meta_description">説明</string>
     <string name="meta_comment">コメント</string>
     <string name="meta_other">その他</string>
+    <string name="bulk_cached">%1$d 件は変更なし、キャッシュにより省略</string>
 </resources>

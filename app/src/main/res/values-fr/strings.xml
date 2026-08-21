@@ -117,4 +117,5 @@
     <string name="meta_description">Description</string>
     <string name="meta_comment">Commentaire</string>
     <string name="meta_other">Autre</string>
+    <string name="bulk_cached">%1$d inchangées, ignorées via le cache</string>
 </resources>
