@@ -1,0 +1,1 @@
+Bulk clean now shows what metadata each file carried, sorts the ones with metadata to the top, and remembers already-clean files to speed up re-scans. PNG text metadata is now shown in the details too.
