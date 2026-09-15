@@ -1,0 +1,1 @@
+Smaller app: the release build now runs through R8 (code and resource shrinking). Builds are reproducible from this version on, so F-Droid can ship the developer-signed APK and installs from GitHub and F-Droid can update over each other. No changes to scrubbing itself.

@@ -26,3 +26,7 @@ keystore.properties
 # Local scratch, never committed
 /_to_delete/
 *.HEIC
+
+# Docker release output (docker/README.md)
+/release-*/
+/release-verify-*/

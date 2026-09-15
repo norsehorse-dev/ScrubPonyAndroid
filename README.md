@@ -114,6 +114,29 @@ build installs the NDK (`26.1.10909125`) and CMake (`3.22.1`) pinned in
 `app/build.gradle.kts`. Toolchain: AGP 8.5.2, Kotlin 1.9.24, Compose BOM
 2024.06.00, `minSdk 29`, `targetSdk 34`.
 
+## Reproducible builds
+
+From 1.3.1 on, releases are reproducible: F-Droid rebuilds each tag from
+source and ships the developer-signed APK when its build matches the one
+attached to the GitHub release byte for byte (signature aside). That means
+installs from GitHub and from F-Droid share one signature and update over
+each other.
+
+What makes the build deterministic lives in three places. `app/build.gradle.kts`
+disables the ART baseline profile (AGP does not serialize it reproducibly),
+keeps the Google dependency-metadata blob and the version-control-info file
+out of the APK, and runs R8 with a single keep rule for the JNI boundary.
+`app/src/main/cpp/CMakeLists.txt` maps the source and build directories to
+fixed neutral paths and pins a content-hash build-id, so nothing about the
+build host reaches `libscrubpony_jni.so`. And every release is built on Linux
+inside the container in `docker/`, which mirrors F-Droid's buildserver
+(Debian trixie, openjdk-21, the pinned NDK and CMake), because the NDK's
+macOS and Linux compilers are not guaranteed to produce identical code.
+
+`tools/verify_repro.sh` is the gate: it builds a ref twice from clean clones,
+checks the two match, and checks a published APK against them.
+`docker/README.md` has the exact commands.
+
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).

@@ -22,8 +22,8 @@ android {
         // all. See docs/ANDROID-NOTES.md.
         minSdk = 29
         targetSdk = 34
-        versionCode = 4
-        versionName = "1.3.0"
+        versionCode = 5
+        versionName = "1.3.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -59,11 +59,21 @@ android {
     buildTypes {
         release {
             if (keystorePropsFile.exists()) signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false
+            // R8 shrinking and obfuscation. The only thing that must survive
+            // by name is the JNI boundary (NativeScrubber's native methods),
+            // kept in proguard-rules.pro. Nothing else is reached by
+            // reflection.
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            // Keep AGP from writing META-INF/version-control-info.textproto
+            // (the git revision of the build tree) into the APK. It is one
+            // more host-derived byte that F-Droid's rebuild would have to
+            // match exactly.
+            vcsInfo.include = false
         }
     }
 
@@ -102,6 +112,20 @@ android {
         getByName("test") {
             kotlin.srcDirs("src/test/kotlin")
         }
+    }
+}
+
+// Drop the ART baseline profile (assets/dexopt/baseline.prof + baseline.profm)
+// from the release APK. AGP serializes it from unordered collections, so it
+// is not byte-reproducible and fails F-Droid's reproducible-build comparison
+// on those two files alone (a generic Compose/AGP issue, nothing to do with
+// the C core). The only cost is first-run startup speed, nothing functional.
+// Same fix as PassPony and VaultPony. Verify with a CLEAN build
+// (./gradlew clean assembleRelease); an incremental build repackages a
+// stale profile from build/intermediates and looks like the fix failed.
+tasks.configureEach {
+    if (name.matches(Regex("compile.*ArtProfile"))) {
+        enabled = false
     }
 }
 
