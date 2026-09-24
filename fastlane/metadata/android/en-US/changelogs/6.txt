@@ -1,0 +1,1 @@
+Settings now stick. Strict mode and Keep orientation were only held in memory, so closing the app reset them to their defaults. Both are saved now and stay the way you left them.
